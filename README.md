@@ -1,10 +1,10 @@
-# GigScore: AI-Based Income Protection for Delivery Partners
+# PayFlux: AI-Based Income Protection for Delivery Partners
 
 ---
 
 
 
-**Project Name:** GigScore: AI-Based Income Protection for Delivery Partners
+**Project Name:** PayFlux: AI-Based Income Protection for Delivery Partners
 
 **Team Name:** Valtrix
 
