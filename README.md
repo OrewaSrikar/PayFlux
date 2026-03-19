@@ -165,16 +165,4 @@ This multi-source approach makes coordinated fraud rings easier to identify.
 
 ---
 
-## Contributing
 
-We welcome contributions! Please feel free to submit pull requests or open issues for any bugs or feature requests.
-
----
-
-## License
-
-This project is open-source and available under the MIT License.
-
----
-
-**For more information or inquiries, please contact the development team.**
