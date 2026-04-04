@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: users
+    // Document ID: userId (Auth UID)
+    // Fields: uid, name, city, deliveryType, hourlyIncome, createdAt
+    //
+    // Collection: policies
+    // Document ID: policyId
+    // Fields: userId, status, premium, riskScore, startDate, endDate
+    //
+    // Collection: claims
+    // Document ID: claimId
+    // Fields: userId, policyId, triggerType, amount, status, timestamp
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'name', 'city', 'deliveryType', 'hourlyIncome']) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.city is string && data.city.size() > 0 &&
+             data.deliveryType in ['Bike', 'Car', 'Scooter'] &&
+             data.hourlyIncome is number && data.hourlyIncome >= 0;
+    }
+    function isValidPolicy(data) {
+      return data.keys().hasAll(['userId', 'status', 'premium', 'riskScore', 'startDate', 'endDate']) &&
+             data.userId == request.auth.uid &&
+             data.status in ['active', 'expired'] &&
+             data.premium is number &&
+             data.riskScore is number;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+    }
+
+    match /policies/{policyId} {
+      allow read: if isDocOwner();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid && isValidPolicy(request.resource.data);
+      allow update: if isDocOwner() && isValidPolicy(request.resource.data);
+    }
+
+    match /claims/{claimId} {
+      allow read: if isDocOwner();
+      // Claims are auto-generated, but for demo purposes we allow creation if authenticated and owner
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+  }
+}
